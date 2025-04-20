@@ -1,4 +1,6 @@
-import java.util.*;
+package LineByLine;
+
+import java.util.*
 
 public class Main {
     public static void main(String[] args) {
@@ -16,7 +18,8 @@ public class Main {
                 "WRITEE F;\n" +
                 "END";
 
-
+        CompilerAllAtOnce compiler = new CompilerAllAtOnce();
+        compiler.processAllAtOnce(program);
     }
 }
 
@@ -45,7 +48,7 @@ class SyntaxAnalyzer {
 // Semantic Analyzer
 class SemanticAnalyzer {
     public boolean analyze(List<Token> tokens) {
-        ;// Implementation
+        // Implementation
     }
 }
 
