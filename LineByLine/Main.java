@@ -1,25 +1,35 @@
+// Reformatted LineByLine/Main.java based on Lab10A style
 package LineByLine;
 
 import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        String[] program = {
-                "BEGIN",
-                "INTEGER A, B, C, E, M, N, G, H, I, a, c",
-                "INPUT A, B, C",
-                "LET B = A */ M",
-                "LET G = a + c",
-                "temp = <s%**h - j / w +d +*$&",
-                "M = A/B+C",
-                "N = G/H-I+a*B/c",
-                "WRITE M",
-                "WRITEE F",
-                "END"
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.println("Enter program lines (type DONE to finish):");
+            List<String> programList = new ArrayList<>();
+            while (true) {
+                String line = scanner.nextLine();
+                if (line.equalsIgnoreCase("DONE")) break;
+                programList.add(line);
+            }
+        }
+        String[] program = new String[] {
+            "BEGIN",
+            "INTEGER A, B, C, E, M, N, G, H, I, a, c",
+            "INPUT A, B, C",
+            "LET B = A */ M",
+            "LET G = a + c",
+            "temp = <s%**h - j / w +d +*$&",
+            "M = A/B+C",
+            "N = G/H-I+a*B/c",
+            "WRITE M",
+            "WRITEE F",
+            "END"
         };
 
         Compiler compiler = new Compiler();
-        compiler.processLineByLine(program);
+        compiler.runLineByLine(program);
     }
 }
 
@@ -27,100 +37,103 @@ class Compiler {
     private final Set<Character> invalidChars = new HashSet<>(Arrays.asList('%', '$', '&', '<', '>', ';', '0','1','2','3','4','5','6','7','8','9'));
     private final Set<String> keywords = new HashSet<>(Arrays.asList("BEGIN", "INTEGER", "INPUT", "LET", "WRITE", "END"));
 
-    public void processLineByLine(String[] lines) {
-        for (int i = 0; i < lines.length; i++) {
-            String line = lines[i];
-            System.out.println("Line " + (i + 1) + ": " + line);
+    public void runLineByLine(String[] program) {
+        for (int i = 0; i < program.length; i++) {
+            String line = program[i];
+            System.out.println("LINE " + (i + 1) + ": " + line);
+
             if (i == 4 || i == 6 || i == 7) {
-                if (!containsErrors(line)) {
-                    runCompilerStages(line);
+                if (!hasErrors(line)) {
+                    processStages(line);
                 } else {
-                    checkErrors(line);
+                    detectErrors(line);
                 }
             } else {
-                checkErrors(line);
+                detectErrors(line);
             }
+
             System.out.println();
         }
     }
 
-    private boolean containsErrors(String line) {
+    private boolean hasErrors(String line) {
         for (char ch : line.toCharArray()) {
             if (invalidChars.contains(ch)) return true;
         }
-        if (line.matches(".*[+\-*/]{2,}.*")) return true;
-        if (line.trim().endsWith(";")) return true;
-        if (line.contains("WRITEE")) return true;
-        return false;
+        return line.matches(".*[+\\-*/]{2,}.*") ||
+               line.trim().endsWith(";") ||
+               line.contains("WRITEE");
     }
 
-    private void checkErrors(String line) {
+    private void detectErrors(String line) {
         for (char ch : line.toCharArray()) {
             if (invalidChars.contains(ch)) {
                 System.out.println("Semantic Error: Invalid character '" + ch + "'");
                 return;
             }
         }
-        if (line.contains("WRITEE")) {
+        String firstWord = line.split("\\s+")[0];
+        if (!keywords.contains(firstWord) && !line.contains("WRITEE")) {
+            System.out.println("Lexical Error: Invalid keyword '" + firstWord + "'");
+        } else if (line.contains("WRITEE")) {
             System.out.println("Lexical Error: Invalid keyword 'WRITEE'");
-            return;
-        }
-        if (line.matches(".*[+\-*/]{2,}.*")) {
+        } else if (line.matches(".*[+\\-*/]{2,}.*")) {
             System.out.println("Syntax Error: Combined operators not allowed");
-            return;
-        }
-        if (line.trim().endsWith(";")) {
+        } else if (line.trim().endsWith(";")) {
             System.out.println("Syntax Error: Line must not end with a semicolon");
-            return;
+        } else {
+            System.out.println("Error-free line");
         }
-        System.out.println("Error-free line");
     }
 
-    private void runCompilerStages(String line) {
-        lexicalAnalysis(line);
-        syntaxAnalysis(line);
-        semanticAnalysis(line);
-        String icr = intermediateCode(line);
-        String codeGen = codeGeneration(icr);
-        codeOptimization(codeGen);
-        targetMachineCode(codeGen);
+    private void processStages(String line) {
+        performLexicalAnalysis(line);
+        performSyntaxAnalysis(line);
+        performSemanticAnalysis(line);
+        String icr = generateICR(line);
+        String genCode = generateCode(icr);
+        optimizeCode(genCode);
+        convertToMachineCode(genCode);
     }
 
-    private void lexicalAnalysis(String line) {
+    private void performLexicalAnalysis(String line) {
+        System.out.println("STAGE 1: LEXICAL ANALYSIS");
         String[] tokens = line.split("[ =,+*/()-]+");
-        System.out.println("Lexical Tokens: " + Arrays.toString(tokens));
+        System.out.println("Tokens: " + Arrays.toString(tokens));
     }
 
-    private void syntaxAnalysis(String line) {
-        // Simplified syntax check
-        System.out.println("Syntax: Valid");
+    private void performSyntaxAnalysis(String line) {
+System.out.println("STAGE 2: SYNTAX ANALYSIS\nResult: Valid");
     }
 
-    private void semanticAnalysis(String line) {
-        System.out.println("Semantic: Valid");
+    private void performSemanticAnalysis(String line) {
+System.out.println("STAGE 3: SEMANTIC ANALYSIS\nResult: Valid");
     }
 
-    private String intermediateCode(String line) {
+    private String generateICR(String line) {
+        System.out.println("STAGE 4: INTERMEDIATE CODE REPRESENTATION (ICR)");
         String[] parts = line.split("=");
-        String rhs = parts[1].trim();
         String lhs = parts[0].trim();
-        String icr = "t1 = " + rhs + "\n" + lhs + " = t1";
-        System.out.println("ICR: " + icr);
+        String rhs = parts[1].trim();
+String icr = "t1 = " + rhs + "\n" + lhs + " = t1";
+        System.out.println(icr);
         return icr;
     }
 
-    private String codeGeneration(String icr) {
+    private String generateCode(String icr) {
+        System.out.println("STAGE 5: CODE GENERATION");
         String code = icr.replace("=", "<=");
-        System.out.println("Code Generation: " + code);
+        System.out.println(code);
         return code;
     }
 
-    private void codeOptimization(String code) {
-        System.out.println("Optimization: " + code);
+    private void optimizeCode(String code) {
+System.out.println("STAGE 6: CODE OPTIMIZATION\nOptimized Code: " + code);
     }
 
-    private void targetMachineCode(String code) {
-        String binary = code.replaceAll("[A-Za-z]", "1").replaceAll("[=+\-*/ ]", "0");
-        System.out.println("Target Machine Code: " + binary);
+    private void convertToMachineCode(String code) {
+        System.out.println("STAGE 7: TARGET MACHINE CODE");
+        String binary = code.replaceAll("[A-Za-z]", "1").replaceAll("[=+\\-*/ ]", "0");
+        System.out.println("Binary: " + binary);
     }
 }
